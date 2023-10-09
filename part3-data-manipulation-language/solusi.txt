@@ -2,57 +2,138 @@ RELEASE 1:
 
 1) Insert
     1.a) Insert 3 product type.
+	insert into product_type (nama) values ('elektronik');
+	insert into product_type (nama) values ('pakaian');
+	insert into product_type (nama) values ('kendaraan');
 
     1.b) Insert 2 product dengan product type id = 1
+	insert into product (nama,harga,stok,id_product_type) values ('Samsung A20', '20000', '200', 1) 
+	insert into product (nama,harga,stok,id_product_type) values ('Android Tv', '40000', '100', 1) 
 
     1.c) Insert 3 product dengan product type id = 2
+	insert into product (nama,harga,stok,id_product_type) values ('Kaos', '40000', '240', 2) 
+	insert into product (nama,harga,stok,id_product_type) values ('Jaket', '23000', '240', 2) 
+	insert into product (nama,harga,stok,id_product_type) values ('Sepatu', '21000', '10', 2) 
+
 
     1.d) Insert 3 product dengan product type id = 3
+	insert into product (nama,harga,stok,id_product_type) values ('Motor', '120000', '20', 3) 
+	insert into product (nama,harga,stok,id_product_type) values ('Mobil', '450000', '24', 3) 
+	insert into product (nama,harga,stok,id_product_type) values ('Helikopter', '540000', '34', 3) 
+
 
     1.e) Insert product description pada setiap product.
+	insert into product_description (description, spek) values 
+ 	('Tahun 2023','4/64GB'),
+ 	('Tahun 2023','32inch'),
+ 	('Cotton','Merah'),
+ 	('Denim','Hitam'),
+ 	('Merah','Matic'),
+ 	('Biru','Manual'),
+ 	('Attack','Cammo'),
+ 	('Becak motor','Roda 3');
+
 
     1.f) Insert 3 payment methods.
+	insert into payment_method (nama) values 
+	('Cash'),
+	('Transfer'),
+	('E-wallet');
 
     1.g) Insert 5 user pada tabel user.
+	insert into pembeli (nama, alamat, gender, created_at) values
+	('Ahmad','Jakarta', 'P', current_date),
+	('Bima','Malang', 'P', current_date),
+	('Tasya','Palembang', 'L', current_date),
+	('Burhan','Makassar', 'P', current_date),
+	('Hana','Surabaya', 'L', current_date);
 
     1.h) Insert 3 transaksi di masing-masing user (min 3 user). (soal berlanjut ke soal 1.j)
 
+	insert into transaksi (tanggal, total, status, id_pembeli, 	id_payment_method) values
+	(current_date, '2', 'Lunas', 1, 1),
+	(current_date - interval '3 days', '5', 'Lunas', 4, 2),
+	(current_date, '4', 'Menunggu Pembayaran', 2, 2),
+	(current_date, '10', 'Lunas', 3, 3);
+
     1.i) Insert 3 product di masing-masing transaksi.
+	INSERT INTO transaction_products (transaction_product_id, transaction_id, 	product_id, quantity)
+	VALUES (1, 1, 101, 2);
+
+	INSERT INTO transaction_products (transaction_product_id, transaction_id, 	product_id, quantity)
+	VALUES (2, 1, 102, 1);
+
+	INSERT INTO transaction_products (transaction_product_id, transaction_id, 	product_id, quantity)
+	VALUES (3, 1, 103, 3);
 
 2) Select
     2.a) Tampilkan nama user / pelanggan dengan gender Laki-laki / M.
+	select nama, gender from pembeli where gender = 'L' order by id;
 
     2.b) Tampilkan product dengan id = 3.
+	select * from product where id = 3
 
     2.c) Tampilkan data pelanggan yang created_at dalam range 7 hari kebelakang dan mempunyai nama mengandung kata ‘a’.
-
+	
     2.d) Hitung jumlah user / pelanggan dengan status gender Perempuan.
-
+	select nama, count(1), gender from pembeli where gender = 'P' order by id;
     2.e) Tampilkan data pelanggan dengan urutan sesuai nama abjad
+	select * from pembeli order by nama asc;
 
     2.f) Tampilkan 5 data transaksi dengan product id = 3
+	select * from transaksi where product_id = 3 limit 5;
 
 3. Update
     3.a) Ubah data product id 1 dengan nama ‘product dummy’.
+	update product set nama = ‘product dummy’ where id = 1
 
     3.b) Update qty = 3 pada transaction detail dengan product id 1.
+	update detail_transaksi set qty = 3 where id_product= 1;
 
 4. Delete
     4.a) Delete data pada tabel product dengan id 1.
+	delete from product where id = 1;
 
     4.b) Delete pada tabel product dengan product-type id 1.
-
+	delete from product where id_product_type = 1;
 
 RELEASE 2: Join, Union, Sub-query, Function
 
 1. Gabungkan data transaksi dari user id 1 dan user id 2.
+select * from transaksi where id = 1
+union 
+select * from transaksi where id = 2;
 
 2. Tampilkan jumlah harga transaksi user id 1.
+select sum(harga*qty) from transaksi 
+join pembeli on pembeli.id = transaksi.id_pembeli
+join transaksi_detail on transaksi.id = transaksi_detail.id_transaksi where transaksi.id_pembeli = 1;
 
 3. Tampilkan total transaksi dengan product type 2.
+select count(1) from transaksi_detail
+join product on product.id_product_type = transaksi_detail.id_product where product.id_product_type = 2;
 
 4. Tampilkan semua field table product dan field name table product type yang saling berhubungan.
+select count(1) from transaksi_detail
+join product on product.id_product_type = transaksi_detail.id_product where product.id_product_type = 2;
+select nama from product_type where id in (select id_product_type from product);
 
 5. Tampilkan semua field table transaction, field name table product dan field name table user.
+SELECT 
+    transaksi_detail.*, 
+    transaksi.*, 
+    product.nama as nama_product, 
+    pembeli.nama as nama_pembeli
+FROM 
+    transaksi_detail
+JOIN 
+    transaksi ON transaksi_detail.id_transaksi = transaksi.id
+JOIN 
+    product ON transaksi_detail.id_product = product.id
+right JOIN 
+    pembeli ON transaksi_detail.id_product = pembeli.id;
 
 6. Tampilkan data products yang tidak pernah ada di tabel transaction_details dengan sub-query.
+
+select * from transaksi_detail where id not in (select id_product from product);
+
